@@ -24,11 +24,11 @@ class Tasks(models.Model):
         return self.title
 
 class Tag(models.Model):
-    tag_id =models.AutoField(primary_key=True)
-    tag_title = models.CharField(max_length=25)
+    id =models.AutoField(primary_key=True)
+    title = models.CharField(max_length=25)
 
 
     def __str__(self):
-        return self.tag_title
+        return self.title
 
 

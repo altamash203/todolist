@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                         max_length=10,
                     ),
                 ),
-                ("tag", models.ManyToManyField(related_name="tasks", to="my_app.tag")),
+                ("tag", models.ManyToManyField(related_name="tasks", to="todoapp.tag")),
                 (
                     "user_id",
                     models.ForeignKey(
