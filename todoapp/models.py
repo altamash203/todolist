@@ -6,11 +6,12 @@ from django.contrib.auth.models import User
 
 class Tasks(models.Model):
     priority_choices =[('Optional','Optional'),
-                       ('Medium','Medium'),('Necessary','Necessary'),
+                       ('Medium','Medium'),
+                       ('Necessary','Necessary'),
                        ("Urgent","Urgent"),
                        ("Critical","Critical")
                        ]
-    task_id=models.AutoField(primary_key= True)
+    id=models.AutoField(primary_key= True)
     title=models.CharField(max_length=20)
     description =models.TextField()
     tag =models.ManyToManyField("Tag",related_name="tasks")
