@@ -76,9 +76,13 @@ WSGI_APPLICATION = "todoapp_backend.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',  # Set MySQL as the database engine
+        'NAME': 'todoapp',          # Your database name
+        'USER': 'root',             # Your MySQL username
+        'PASSWORD': 'password',     # Your MySQL password
+        'HOST': 'localhost',                   # Use 'localhost' or your MySQL server IP address
+        'PORT': '3306',                        # Default MySQL port
     }
 }
 
@@ -100,6 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTH_USER_MODEL = 'todoapp.User'
+
 
 
 # Internationalization
