@@ -24,6 +24,10 @@ class Tasks(models.Model):
                        ("Urgent","Urgent"),
                        ("Critical","Critical")
                        ]
+    status_choices = [('Pending','Pending'),
+                        ('In Progress','In Progress'),
+                        ('Completed','Completed')
+                        ]
     id=models.AutoField(primary_key= True)
     title=models.CharField(max_length=20)
     description =models.TextField()
@@ -31,7 +35,7 @@ class Tasks(models.Model):
     dead_line =models.DateTimeField()
     priority =models.CharField(max_length=10,choices=priority_choices)
     user =models.ForeignKey("User",on_delete=models.CASCADE,related_name="tasks",null = False)
-
+    status =models.CharField(max_length=20,choices=status_choices,default="Pending")
 
     def __str__(self):
         return self.title
