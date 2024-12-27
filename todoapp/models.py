@@ -1,21 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser,BaseUserManager
+from django.contrib.auth.models import AbstractUser
+from .manager import UserManager
 
 
 
 # Create your models here.
-class UserManager(BaseUserManager):
-    def create_user(self, username, email, password=None):
-        if not email:
-            raise ValueError("The Email is Required")
-        email = self.normalize_email(email)
-        user = self.model(username=username, email=email)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
 
 
-class User(AbstractUser, UserManager):
+class User(AbstractUser):
     username = models.CharField(max_length=20, unique=True)
     email = models.EmailField(unique=True)
     USERNAME_FIELD = 'email'
@@ -38,7 +30,7 @@ class Tasks(models.Model):
     tag =models.ManyToManyField("Tag",related_name="tasks")
     dead_line =models.DateTimeField()
     priority =models.CharField(max_length=10,choices=priority_choices)
-    user =models.ForeignKey("User",on_delete=models.CASCADE)
+    user =models.ForeignKey("User",on_delete=models.CASCADE,related_name="tasks",null = False)
 
 
     def __str__(self):
