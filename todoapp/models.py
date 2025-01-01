@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from .manager import UserManager
 
 
 
@@ -8,11 +7,9 @@ from .manager import UserManager
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=20, unique=True)
     email = models.EmailField(unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    objects = UserManager()
 
     def __str__(self):
         return self.email
@@ -43,8 +40,6 @@ class Tasks(models.Model):
 class Tag(models.Model):
     id =models.AutoField(primary_key=True)
     title = models.CharField(max_length=25)
-
-
     def __str__(self):
         return self.title
 

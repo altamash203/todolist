@@ -5,22 +5,25 @@ from .serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .models import Tasks,User
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+
 class SignUp(APIView):
+    permission_classes = [AllowAny]
+
     def post(self,request):
+
         data =request.data
-        email = data.get('email')
-        username = data.get('username')
-        password = data.get('password')
-        if not email or not username or not password:
-            return Response({"error":"Please provide all the required fields"},status=status.HTTP_400_BAD_REQUEST)
 
-        elif User.objects.filter(email=email).exists():
-            return Response({"error":"User with this email already exists"},status=status.HTTP_400_BAD_REQUEST)
-        else:
-            user = User.objects.create_user(email=email,username=username,password=password)
-            return Response({"message":"User Created Successfully","user":{"email":user.email,"username":user.username}},status=status.HTTP_201_CREATED)
+        serialized_signup = SignUpSerializer(data=data)
+        if not serialized_signup.is_valid():
+            return Response({"error":serialized_signup.errors},status=status.HTTP_400_BAD_REQUEST)
+        serialized_signup.save()
 
+        return Response({"message":"User created successfully", "data":serialized_signup.data},status=status.HTTP_201_CREATED)
 class Login(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
     def post(self,request):
         data = request.data
         email = data.get('email')
@@ -35,16 +38,13 @@ class Login(APIView):
 
             else:
                 return Response({"error":"Invalid Credentials"},status=status.HTTP_400_BAD_REQUEST)
-
-
-class TaskLists(APIView):
-    def get(self,request):
-        tasks = Tasks.objects.all()
-        seriaized_task = TaskSerializer(tasks,many=True)
-        return Response(seriaized_task.data,status=status.HTTP_200_OK)
-
 class Task(APIView):
 
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
+        tasks = Tasks.objects.filter(user=request.user)
+        serialized_task = TaskSerializer(tasks,many=True)
+        return Response(serialized_task.data,status=status.HTTP_200_OK)
     def post(self,request):
         serialized_task = TaskSerializer(data =request.data)
         if serialized_task.is_valid():
@@ -52,10 +52,11 @@ class Task(APIView):
             return Response(serialized_task.data,status=status.HTTP_201_CREATED)
         else:
             return Response(serialized_task.errors,status=status.HTTP_400_BAD_REQUEST)
-
+class TaskDetail(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self,request,pk):
         try:
-            task = Tasks.objects.get(pk=pk)
+            task = Tasks.objects.get(user=request.user,pk=pk)
             serialized_task = TaskSerializer(task)
             return Response(serialized_task.data,status=status.HTTP_200_OK)
         except Tasks.DoesNotExist:
@@ -63,7 +64,7 @@ class Task(APIView):
     def put(self,request,pk):
         try:
 
-             task =Tasks.objects.get(pk=pk)
+             task =Tasks.objects.get(user=request.user,pk=pk)
              serialized_update = TaskSerializer(task,data = request.data)
              if serialized_update.is_valid():
                     serialized_update.save()
@@ -75,15 +76,14 @@ class Task(APIView):
 
     def delete(self,request,pk):
         try:
-            task =Tasks.objects.get(pk=pk)
+            task =Tasks.objects.get(user=request.user,pk=pk)
             task.delete()
             return Response({"message":"task deleted"},status=status.HTTP_204_NO_CONTENT)
         except:
             return Response({"error":"task not found"},status=status.HTTP_404_NOT_FOUND)
-
 class FilterTasks(APIView):
-
-    def get(self,request,status=None,tag=None):
+    permission_classes = [IsAuthenticated]
+    def get(self,request):
 
         filter_status = request.query_params.get('status')
         filter_tag =request.query_params.get('tag')

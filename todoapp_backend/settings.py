@@ -74,12 +74,6 @@ WSGI_APPLICATION = "todoapp_backend.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES':(
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # Set MySQL as the database engine
@@ -90,6 +84,19 @@ DATABASES = {
         'PORT': '3306',                        # Default MySQL port
     }
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+AUTH_USER_MODEL = 'todoapp.User'
+
+
 
 
 # Password validation
@@ -110,8 +117,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'todoapp.User'
-REST_AUTH ={"JWT"}
 
 
 
