@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "todoapp",
-    "rest_framework"
+    "rest_framework",
+    "django_filters"
+
 ]
 
 MIDDLEWARE = [
@@ -90,8 +92,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
+        'rest_framework.permissions.IsAuthenticated'],
+
 }
 
 AUTH_USER_MODEL = 'todoapp.User'

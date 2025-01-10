@@ -3,11 +3,12 @@ from django.contrib.auth import get_user_model
 from .models import  *
 
 
+
 class SignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
-    password = serializers.CharField(required=True)
-    confirm_password = serializers.CharField(write_only=True)
+    password = serializers.CharField(required=True,write_only=True)
+    confirm_password = serializers.CharField(required=True,write_only=True)
     def validate_email(self,email):
         if get_user_model().objects.filter(email=email).exists():
             raise serializers.ValidationError("User with this email already exists")
@@ -29,42 +30,68 @@ class SignUpSerializer(serializers.Serializer):
         user = get_user_model().objects.create_user(email=validated_data.get('email'),username=validated_data.get('username'),password=validated_data.get('password'))
 
         return user
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
+    def validate_email(self,email):
+        if not  get_user_model().objects.filter(email=email).exists():
+            raise serializers.ValidationError("User not exists ")
+        return email
+
+
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = "__all__"
 
-class TaskSerializer(serializers.ModelSerializer):
-    tag = TagSerializer(many=True)
+
+
+class Task_Post_Put_Serializer(serializers.Serializer):
+    tag =serializers.ListField(child=serializers.CharField(),required=False,write_only=True)
+    title = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+    dead_line = serializers.DateTimeField(required=False)
+    priority = serializers.CharField(required=False)
+    status = serializers.CharField(required=False)
     def create(self, validated_data):
-        tags = validated_data.pop('tag')
+        # Check if 'tag' exists in the incoming data
+        tags = validated_data.pop('tag', None)
+
+        # Create the task object
         task = Tasks.objects.create(**validated_data)
-        for tag in tags:
-            tag, created = Tag.objects.get_or_create(**tag)
-            task.tag.add(tag)
+
+        # If tags are provided, process and associate them
+        if tags:
+            for tag in tags:
+                tag_obj, created = Tag.objects.get_or_create(title=tag)
+                task.tag.add(tag_obj)
+
         return task
     def update(self, instance, validated_data):
-        tags = validated_data.pop('tag')
-        instance.title = validated_data.get('title',instance.title)
-        instance.description = validated_data.get('description',instance.description)
-        instance.dead_line = validated_data.get('dead_line',instance.dead_line)
-        instance.priority = validated_data.get('priority',instance.priority)
-        instance.status = validated_data.get('status',instance.status)
+
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.dead_line = validated_data.get('dead_line', instance.dead_line)
+        instance.priority = validated_data.get('priority', instance.priority)
+        instance.status = validated_data.get('status', instance.status)
+
+        if validated_data.get('tag'):
+            tags = validated_data.pop('tag')
+            instance.tag.clear()
+            for tag in tags:
+                tag_obj, created = Tag.objects.get_or_create(title =tag)
+                instance.tag.add(*tag_obj)
         instance.save()
-        instance.tag.clear()
-        for tag in tags:
-            tag, created = Tag.objects.get_or_create(**tag)
-            instance.tag.add(tag)
         return instance
+
+
+
+class Task_Get_Serializer(serializers.ModelSerializer):
+    tags = serializers.StringRelatedField(source='tag', many=True, read_only=True)
     class Meta:
         model = Tasks
-        fields = "__all__"
-
+        exclude =['tag']
 
 
 
